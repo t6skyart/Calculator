@@ -37,30 +37,35 @@ import android.widget.Toast;
  * @date Jan 7, 2014
  * @version 1.6
  */
+//Simple GUI designed to model a calculator
 public class Calculator extends Activity implements OnClickListener {
-	private TextView tv_show;
-	private Button btn_clear;
-	private StringBuffer str_show = new StringBuffer("");
-	private BigDecimal num1, num2;
+	//declarations
+	private TextView tv_show; //text display
+	private Button btn_clear; //clear text field button
+	private StringBuffer str_show = new StringBuffer(""); //string buffer for text display
+	private BigDecimal num1, num2; //numbers (user inputs) to perform operations on
 	private boolean flag_dot = true;
 	private boolean flag_num1 = false;
-	private String str_oper = null;
-	private String str_result = null;
-	private int scale = 2;
+	private String str_oper = null; //operator
+	private String str_result = null; //result
+	private int scale = 2; //determines size of GUI
 	private boolean isScaleChanged = false;
 	private boolean flag_minus = false;
 
+	//set size of GUI
 	public void setScale(int scale) {
 		this.scale = scale;
 	}
 
 	@Override
+	//upon creating Calculator
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		initView();
 	}
 
+	//init method. No return value
 	private void initView() {
 		tv_show = (TextView) findViewById(R.id.tv_show);
 		findViewById(R.id.btn0).setOnClickListener(this);
@@ -98,6 +103,7 @@ public class Calculator extends Activity implements OnClickListener {
 	}
 
 	@Override
+	//controls input buttons. When buttons are pressed. No return value
 	public void onClick(View v) {
 		Button btn = (Button) v;
 		switch (v.getId()) {
@@ -110,6 +116,7 @@ public class Calculator extends Activity implements OnClickListener {
 				flag_dot = false;
 			}
 			break;
+		//what occurs upon pressing the clear button
 		case R.id.btn_clear:
 			if (!(str_show.toString() == "")) {
 				if (!flag_dot) {
@@ -165,7 +172,7 @@ public class Calculator extends Activity implements OnClickListener {
 			break;
 		}
 	}
-
+	//operator control. No return value
 	private void setNum1(String oper) {
 		if (str_oper != null && !str_show.toString().equals("") && flag_num1) {
 			calculate();
@@ -188,23 +195,29 @@ public class Calculator extends Activity implements OnClickListener {
 		flag_dot = true;
 	}
 
+	/*handles calculations. Gets string operator from input and performs calculations based on them.
+	No return value.*/
 	private void calculate() {
 		if(str_show.toString().equals("-")) return;
 		double result = 0;
 		num2 = new BigDecimal(str_show.toString());
+		//addition
 		if (str_oper.equals("+")) {
 			result = Calculate.add(num1, num2);
 		}
+		//subtraction
 		if (str_oper.equals("-")) {
 			result = Calculate.sub(num1, num2);
 		}
+		//multiplication
 		if (str_oper.equals("*")) {
 			result = Calculate.mul(num1, num2);
 		}
+		//division
 		if (str_oper.equals("/")) {
 			if (!num2.equals(BigDecimal.ZERO)) {
 				result = Calculate.div(num1, num2, scale);
-			} else {
+			} else { //error handling
 				Toast.makeText(Calculator.this, "除数不能为零！", Toast.LENGTH_LONG)
 						.show();
 				showInTextView("");
@@ -215,11 +228,14 @@ public class Calculator extends Activity implements OnClickListener {
 				return;
 			}
 		}
+		//convert result to string and stores it in str_result
 		str_result = String.valueOf(Calculate.round(result, scale));
 		String[] resultStrings = str_result.split("\\.");
 		if (resultStrings[1].equals("0")) {
 			str_result = resultStrings[0];
 		}
+		
+		//displays str_result in text box
 		showInTextView(str_result);
 		str_show = new StringBuffer("");
 		flag_dot = true;
@@ -228,11 +244,13 @@ public class Calculator extends Activity implements OnClickListener {
 		flag_minus = true;
 	}
 
+	//sets tv_show as input
 	private void showInTextView(String str) {
 		tv_show.setText(str);
 	}
 
 	@Override
+	//animations for opening Options Menu. Returns superclass menu.
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.main, menu);
@@ -240,6 +258,7 @@ public class Calculator extends Activity implements OnClickListener {
 	}
 
 	@Override
+	//animations for when item is selected. Returns superclass selected item.
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.action_set_precision:
@@ -253,12 +272,15 @@ public class Calculator extends Activity implements OnClickListener {
 		}
 	}
 
+	//controls opening of about page. No Return value
 	private void openAboutPage() {
 		Intent intent = new Intent(Calculator.this, AboutPage.class);
 		startActivity(intent);
 	}
 
+	//controls size of calculator. No return value
 	private void openScaleSelectDialog() {
+		//default size of calculator
 		NumberPicker precisionPicker = new NumberPicker(this);
 		precisionPicker.setMaxValue(20);
 		precisionPicker.setMinValue(1);
@@ -266,6 +288,7 @@ public class Calculator extends Activity implements OnClickListener {
 		precisionPicker.setOnValueChangedListener(new OnValueChangeListener() {
 
 			@Override
+			//upon changing size of calculator
 			public void onValueChange(NumberPicker picker, int oldVal,
 					int newVal) {
 				isScaleChanged = true;
@@ -284,6 +307,7 @@ public class Calculator extends Activity implements OnClickListener {
 							setScale(scale);
 					}
 				});
+		//upon selecting negative button
 		alertDialog.setNegativeButton(R.string.cancel,
 				new DialogInterface.OnClickListener() {
 
